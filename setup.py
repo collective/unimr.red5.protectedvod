@@ -1,9 +1,18 @@
 from setuptools import setup, find_packages
 import os
+from xml.dom import minidom
 
-version = '0.1'
+name = 'unimr.red5.protectedvod'
 
-setup(name='unimr.red5.protectedvod',
+absolute_path = [os.path.dirname(__file__)] + name.split('.') + ['profiles', 'default', 'metadata.xml']
+
+metadata_file = os.path.join(*absolute_path)
+metadata = minidom.parse(metadata_file)
+version = metadata.getElementsByTagName("version")[0].childNodes[0].nodeValue
+version = str(version).strip()
+
+
+setup(name=name,
       version=version,
       description="Manage, protect and present your video/audio content with Plone but delegate the streaming to Red5",
       long_description=open("README.txt").read() + "\n" +
