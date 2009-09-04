@@ -1,19 +1,20 @@
 Introduction
 ============
 
-unimr.red5.protectedvod implements a solution for secure flash
-streaming with `Red5 server`_. It provides a way to protect your media
-files from being directly downloaded from plone or from being
-"leeched" by other sites. For this purpose the streaming URL is
-secured by altering the requested URL with a signature. When the video
-file is requested, the path of the file is individually signed by
-plone for each request and the streaming is delegated to Red5. Red5
-checks afterwards the signature of the incoming request for validity
-by a shared secret (only known by Plone and Red5!). If the signature
-is valid Red5 delivers the stream. The signature is unique, context
-specific and its duration of validity is limited. Plone's security
-context is therefore completely preserved in Red5. Nobody can
-copy-and-paste that URL anywhere he want and load the video.
+unimr.red5.protectedvod implements a video-on-demand (vod) or
+audio-on-demand solution for secure flash streaming with `Red5
+server`_. It provides a way to protect your media files from being
+directly downloaded from Plone or from being "leeched" by other
+sites. For this purpose the streaming URL is secured by altering the
+requested URL with a signature. When the video/audio file is requested,
+the path of the file is individually signed by Plone for each request
+and the streaming is delegated to Red5. Red5 checks afterwards the
+signature of the incoming request for validity by a shared secret
+(only known by Plone and Red5!). If the signature is valid Red5
+delivers the stream. The signature is unique, context specific and its
+duration of validity is limited. Plone's security context is therefore
+completely preserved in Red5. Nobody can copy-and-paste that URL
+anywhere he want and load the video.
 
 .. _`Red5 server`: http://osflash.org/red5
 
@@ -34,8 +35,11 @@ Then install the product via Plone's Add-on products control panel.
 FileSystemStorage
 -----------------
 
-Both Plone and Red5 require a shared file system with write access.
-Follow the installation instructions of iw.fss_.
+Both Plone and Red5 require a shared file system with read/write
+access. Follow the installation instructions of iw.fss_ and remember
+that only site storage strategies *site1* and *site2* are supported by
+unimr.red5.protectedVOD. Red5 needs the file extension of the
+media content to work.
 
 .. _iw.fss: http://pypi.python.org/pypi/iw.fss
 
@@ -45,7 +49,6 @@ Configuration
 In portal_properties/red5_protectedvod_properties you have to
 configure the Red5 server URL, TTL (time to live) in sec of your
 signature and the shared secret for generating the signature.
-  
 
    :red5_server_url: rtmp://<red5_hostname>/protectedVOD
    :ttl:             60
@@ -58,10 +61,10 @@ Example Archetype
 The included Archetype *Red5Stream* integrates the GPL version of
 flowplayer_ with Plone 3.x. It can play video files (FLV, H.246, MP4)
 as well as audio files (MP3). Clients with "view" permission can only
-view the content by streaming technique by Red5 but cannot directly
-download the content. Per default only clients with owner or manager
-role have the "Download Red5Stream" permission to download the
-content.
+view the content by the streaming technique of Red5 but cannot
+directly download the content. Per default only clients with owner or
+manager role have the "Download Red5Stream" permission to download the
+content from Plone.
 
 .. _flowplayer: http://www.flowplayer.org
 
@@ -98,12 +101,12 @@ The parts of this URL are as follows:
 
     * *signature* is calculated as follows:
       ``hmac.new(shared_secret + baseUrl + streamName + client ip + expires).hexdigest()``
-      where shared_secret is specified in plone's configuration and
+      where shared_secret is specified in Plone's configuration and
       should match the value on the red5 server.
 
     * *expires* is a timestamp given as a hex string. This is the number
       of seconds since January 1, 1970, 00:00:00 in hexadecimal
-      notation plus the the ttl configured in plone portal_properties.
+      notation plus the the ttl configured in Plone portal_properties.
 
     * *streamName* is the name of the video file, for example,
       Extremists.flv, flowplayer.flv, or rocknroll.mp4.
@@ -114,18 +117,25 @@ Red5 application
 
 This package includes the corresponding Red5 application
 *protectedVOD* as WAR-archive (also a tgz-Archive of the java sources;
-s. README.txt in red5-wabapps directory of this product for further
+s. README.txt in ``red5-wabapp`` directory of this product for further
 information). Don't forget to change/synchronize the shared secret in
-both plone's and Red5's configuration!
+both Plone's and Red5's configuration!
 
 
 Requisites
 ==========
 
   * Support for symbolic links for the used file system
-  * FileSystemStorage (iw.fss)
+  * FileSystemStorage (iw.fss_)
   * Red5 server (v0.8.x)
   
+
+Credits
+=======
+  
+  - Andreas Gabriel <gabriel _at_ hrz.uni-marburg.de>
+  - David Nax       <naxd _at_ hrz.uni-marburg.de> 
+
 
 TODO
 ====
