@@ -14,7 +14,7 @@ version = str(version).strip()
 
 setup(name=name,
       version=version,
-      description="Manage, protect and present your video/audio content with Plone but delegate the streaming to Red5",
+      description="Manage, protect and present your video/audio content (FLV, MP3, etc.) with Plone but delegate the flash streaming to Red5",
       long_description=open("README.txt").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
