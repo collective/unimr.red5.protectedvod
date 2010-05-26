@@ -1,3 +1,13 @@
+//IE hack to resolve absolute path from relative path
+//adapted form http://james.padolsey.com/javascript/getting-a-fully-qualified-url/
+function qualifyURL(url){
+    var img = document.createElement('img');
+    img.src = url; // set string url
+    url = img.src; // get qualified url
+    img.src = null; // no server request
+    return url;
+}
+
 jq.preloadImages = function() {
     var a = (typeof arguments[0] == 'object')? arguments[0] : arguments;
     for(var i = a.length -1; i > 0; i--) {
@@ -70,9 +80,10 @@ jq(document).ready(function(){
 		divButton.html(button);
 
 		/* set the xml clip info (url, signature, etc.) */
-		var info_url = this.href + '/protectedvod-info.xml';
+		var info_url = qualifyURL(jq(this).attr("href")) + '/protectedvod-info.xml';
+
 		/* reset clip url */
-		this.href="";
+		jq(this).attr("href","");
 
 		/* embed flowplayer */
 		jq(parent).flowplayer('flowplayer-3.1.2.swf', {
