@@ -1,11 +1,13 @@
 //IE hack to resolve absolute path from relative path
-//adapted form http://james.padolsey.com/javascript/getting-a-fully-qualified-url/
+
 function qualifyURL(url){
-    var img = document.createElement('img');
-    img.src = url; // set string url
-    url = img.src; // get qualified url
-    img.src = null; // no server request
-    return url;
+    if( url.search('://') > 0 ){
+	return url;
+    } 
+    var base_url = window.location.href.split('/');
+    base_url.pop();
+    base_url.push(url);
+    return base_url.join('/');
 }
 
 jq.preloadImages = function() {
