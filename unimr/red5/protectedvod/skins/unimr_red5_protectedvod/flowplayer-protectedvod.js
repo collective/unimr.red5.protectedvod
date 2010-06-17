@@ -86,7 +86,7 @@ jq(document).ready(function(){
 		jq(this).attr("href","");
 
 		/* embed flowplayer */
-		jq(parent).flowplayer('flowplayer-3.1.2.swf', {
+		jq(parent).flowplayer('flowplayer-3.1.5.swf', {
 			/*
 			debug: true ,
 			log: { level: 'debug',
@@ -97,7 +97,7 @@ jq(document).ready(function(){
 			       provider: 'rtmp'
 			},
 			    
-			plugins: {rtmp: {url: 'flowplayer.rtmp-3.1.1.swf'}
+			plugins: {rtmp: {url: 'flowplayer.rtmp-3.1.3.swf'}
 			    
 			},
 			
