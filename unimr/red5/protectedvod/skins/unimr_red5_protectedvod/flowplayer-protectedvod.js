@@ -19,7 +19,7 @@ var preload = ['nosplashimage.jpg', 'play-button.png'];
 jq.preloadImages(preload);
 
 jq(document).ready(function(){
-	jq('div.red5-stream > a').each(function() {
+	jq('div.red5-stream a').each(function() {
 		/* replace marked links with players */
 
 		var width = 320;
