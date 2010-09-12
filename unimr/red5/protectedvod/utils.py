@@ -74,6 +74,8 @@ class Red5ProtectedVodTool(BrowserView):
 
         secret_phrase = hmac_properties.getProperty('secret')
 
+        check_ip = hmac_properties.getProperty('check_ip',False)
+
         try:
             ttl = int(hmac_properties.getProperty('ttl'))
         except ValueError:
@@ -86,11 +88,18 @@ class Red5ProtectedVodTool(BrowserView):
 
         expires = "%08x" % (DateTime().timeTime() + ttl)       
 
-        (path, filename) = self._fss_info(fieldname)
+        (path, filename) = self._storage_info(fieldname)
 
         sign_path = "/%s/" % (path,)
+
         
-        signature = hmac_hexdigest(secret_phrase,[sign_path,filename,clientip,expires])
+        if check_ip:
+            sign_data = [sign_path,filename,clientip,expires]
+        else:
+            sign_data = [sign_path,filename,expires]
+
+        signature = hmac_hexdigest(secret_phrase,sign_data)
+            
 
         data={
             "server_url":  red5_server_url,
@@ -105,30 +114,45 @@ class Red5ProtectedVodTool(BrowserView):
         logger.debug(data)
         return data
     
-    def _fss_info(self,fieldname='file'):
+    def _storage_info(self,fieldname='file'):
         
         context = aq_inner(self.context)
         
         field = context.getField(fieldname)
         storage = field.storage
         
-        try:
+        ## FSS
+        if hasattr(storage,'getFSSInfo'):
             info = storage.getFSSInfo(fieldname, context)  
             strategy = storage.getStorageStrategy(fieldname, context)
             props = storage.getStorageStrategyProperties(fieldname, context, info)
-        except AttributeError:
-            logger.error('cannot retrieve fss properties. fss installed?')
-            return
 
+            valueDirectoryPath=strategy.getValueDirectoryPath(**props)
+            valueFilename=strategy.getValueFilename(**props)
 
-        valueDirectoryPath=strategy.getValueDirectoryPath(**props)
-        valueFilename=strategy.getValueFilename(**props)
-
-        length = len(strategy.storage_path.split('/'))
+            length = len(strategy.storage_path.split('/'))
         
-        path = '/'.join(valueDirectoryPath.split('/')[length-1:]).strip('/')
+            path = '/'.join(valueDirectoryPath.split('/')[length-1:]).strip('/')
         
-        return (path, valueFilename)
+            return (path, valueFilename)
+
+        ## plone.app.blob
+        if hasattr(f.getUnwrapped(obj),'getBlob'):
+
+            blob = f.getUnwrapped(obj).getBlob()
+            blob_file = blob.open()
+            file_path = blob_file.name
+            blob_file.close()
+
+            ## path below blob-dir
+            path = file_path[file_path.find('/0x00/'):]
+            valueFilename = path.split('/')[-1]
+            path = '/'.join(path.split('/')[:-1])
+
+            return (path, valueFilename)
+
+        logger.error('cannot retrieve path properties. fss or plone.app.blob installed?')
+        
 
 
 

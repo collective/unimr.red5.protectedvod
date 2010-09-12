@@ -5,6 +5,7 @@
   <property name="red5_server_url" type="string">rtmp://localhost/protectedVOD</property>
   <property name="ttl" type="string">60</property>
   <property name="secret" type="string">top_secret</property>
+  <property name="check_ip" type="boolean">0</property>
  </object>
  <object name="site_properties" meta_type="Plone Property Sheet">
   <property name="typesUseViewActionInListings" type="lines" purge="False">
