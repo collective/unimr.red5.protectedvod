@@ -5,11 +5,13 @@
   xmlns:i18n="http://namespaces.zope.org/i18n"
   xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
   xmlns:cmf="http://namespaces.zope.org/cmf"
+  xmlns:zcml="http://namespaces.zope.org/zcml"
   i18n_domain="unimr.red5.protectedvod">
 
   <cmf:registerDirectory name="unimr_red5_protectedvod"/>
 
   <five:registerPackage package="." initialize=".initialize" />
+  <five:deprecatedManageAddDelete class=".content.Red5Stream" />
 
   <genericsetup:registerProfile
   		name="default"
@@ -28,9 +30,24 @@
         allowed_attributes="clip netConnectionUrl" 
         />
 
+
   <class class=".content.Red5Stream">
-     <implements interface=".interface.IRed5Stream"/>
+     <require
+        permission="zope2.View"
+        interface=".interface.IRed5Stream" />
+    <require
+        permission="cmf.ModifyPortalContent"
+        set_schema=".interface.IRed5Stream" />
   </class>
+ 
+
+  <!-- Include the adapters, schema extenders and migrators
+       provided that plone.app.blob is present -->
+  <configure zcml:condition="installed plone.app.blob">
+    <include package=".browser" />
+    <include package="archetypes.schemaextender" />
+    <adapter factory=".content.extender.Red5StreamExtender" />
+  </configure>
 
         
 </configure>

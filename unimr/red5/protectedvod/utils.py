@@ -81,10 +81,11 @@ class Red5ProtectedVodTool(BrowserView):
         except ValueError:
             ttl = 60
 
-
-        clientip=request.get('HTTP_X_FORWARDED_FOR',None)
-        if not clientip:
-            clientip=request.get('REMOTE_ADDR',None)
+        clientip = ""
+        if check_ip:
+            clientip=request.get('HTTP_X_FORWARDED_FOR',None)
+            if not clientip:
+                clientip=request.get('REMOTE_ADDR',None)
 
         expires = "%08x" % (DateTime().timeTime() + ttl)       
 
@@ -93,10 +94,7 @@ class Red5ProtectedVodTool(BrowserView):
         sign_path = "/%s/" % (path,)
 
         
-        if check_ip:
-            sign_data = [sign_path,filename,clientip,expires]
-        else:
-            sign_data = [sign_path,filename,expires]
+        sign_data = [sign_path,filename,clientip,expires]
 
         signature = hmac_hexdigest(secret_phrase,sign_data)
             
@@ -137,9 +135,9 @@ class Red5ProtectedVodTool(BrowserView):
             return (path, valueFilename)
 
         ## plone.app.blob
-        if hasattr(f.getUnwrapped(obj),'getBlob'):
+        if hasattr(field.getUnwrapped(context),'getBlob'):
 
-            blob = f.getUnwrapped(obj).getBlob()
+            blob = field.getUnwrapped(context).getBlob()
             blob_file = blob.open()
             file_path = blob_file.name
             blob_file.close()
@@ -147,11 +145,11 @@ class Red5ProtectedVodTool(BrowserView):
             ## path below blob-dir
             path = file_path[file_path.find('/0x00/'):]
             valueFilename = path.split('/')[-1]
-            path = '/'.join(path.split('/')[:-1])
+            path = '/'.join(path.split('/')[:-1]).strip('/')
 
             return (path, valueFilename)
 
-        logger.error('cannot retrieve path properties. fss or plone.app.blob installed?')
+        logger.error('cannot retrieve path properties. iw.fss or plone.app.blob not installed?')
         
 
 
