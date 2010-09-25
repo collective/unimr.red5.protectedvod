@@ -34,7 +34,7 @@
         <div tal:replace="structure provider:plone.abovecontentbody" />
 
         <div class="red5-stream">
-	    <a class="hiddenStructure" href="" tal:attributes="href string:$here_url">INSERT FLASH PLAYER HERE</a>
+	    <a class="hiddenStructure" href="" tal:attributes="href string:${here/absolute_url}">INSERT FLASH PLAYER HERE</a>
         </div>
 
         <p>
