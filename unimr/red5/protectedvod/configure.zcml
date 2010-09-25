@@ -32,12 +32,7 @@
 
 
   <class class=".content.Red5Stream">
-     <require
-        permission="zope2.View"
-        interface=".interface.IRed5Stream" />
-    <require
-        permission="cmf.ModifyPortalContent"
-        set_schema=".interface.IRed5Stream" />
+     <implements interface=".interface.IRed5Stream"/>
   </class>
  
 

@@ -3,7 +3,7 @@ from zope.interface import implements
 
 from archetypes.schemaextender.interfaces import ISchemaExtender
 from archetypes.schemaextender.field import ExtensionField
-from plone.app.blob.field import BlobField, IndexMethodFix
+from plone.app.blob.field import BlobField
 
 from Products.CMFPlone import PloneMessageFactory as _
 from Products.validation import V_REQUIRED
@@ -14,7 +14,7 @@ from Products.Archetypes.atapi import AnnotationStorage
 from unimr.red5.protectedvod.interface import IRed5Stream
 from unimr.red5.protectedvod.permissions import DownloadRed5Stream
 
-class ExtensionBlobField(IndexMethodFix, ExtensionField, BlobField):
+class ExtensionBlobField(ExtensionField, BlobField):
     """ derivative of blobfield for extending schemas """
 
     def set(self, instance, value, **kwargs):
@@ -32,8 +32,6 @@ class Red5StreamExtender(object):
             primary = True,
             searchable = True,
             default = '',
-            accessor = 'getFile',
-            mutator = 'setFile',
             read_permission = DownloadRed5Stream,               
             index_method = 'getIndexValue',
             languageIndependent = True,

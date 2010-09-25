@@ -17,7 +17,6 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-
 from logging import getLogger
 from zope.interface import implements
 
@@ -25,12 +24,16 @@ from ZODB.POSException import ConflictError
 
 from AccessControl import ClassSecurityInfo
 from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.permissions import View, ModifyPortalContent
 
-from Products.ATContentTypes.content.file import ATFile
 from Products.ATContentTypes.content.file import ATFileSchema
 from Products.ATContentTypes.content.schemata import finalizeATCTSchema
 from Products.ATContentTypes.content.base import registerATCT
 
+from plone.app.blob.content import ATBlob
+from plone.app.blob.content import ATBlobSchema
+
+# only required for migration from iw.fss to plone.app.blob
 try:
     from iw.fss.FileSystemStorage import FileSystemStorage
     HAS_FSS = True
@@ -41,19 +44,19 @@ from unimr.red5.protectedvod.interface import IRed5Stream
 from unimr.red5.protectedvod.permissions import DownloadRed5Stream
 from unimr.red5.protectedvod.config import PROJECTNAME
 
-Red5StreamSchema = ATFileSchema.copy()
-
-file_field = Red5StreamSchema['file']
-file_field.read_permission = DownloadRed5Stream
-
 if HAS_FSS:
+    Red5StreamSchema = ATFileSchema.copy()
+    file_field = Red5StreamSchema['file']
+    file_field.read_permission = DownloadRed5Stream
     file_field.storage = FileSystemStorage()
     file_field.registerLayer('storage', file_field.storage)
+else:
+    Red5StreamSchema = ATBlobSchema.copy()
 
 finalizeATCTSchema(Red5StreamSchema)
 
-
-class Red5Stream(ATFile):
+class Red5Stream(ATBlob):
+    """ video/audio content for streaming by red5 server """
 
     implements(IRed5Stream)
     portal_type    = 'Red5Stream'
@@ -64,35 +67,8 @@ class Red5Stream(ATFile):
 
     security       = ClassSecurityInfo()
 
-
     security.declareProtected(DownloadRed5Stream, 'index_html')
     security.declareProtected(DownloadRed5Stream, 'download')
-
-    security.declarePrivate('getIndexValue')
-    def getIndexValue(self, mimetype='text/plain'):
-        """ an accessor method used for indexing the field's value
-            XXX: the implementation is mostly based on archetype's
-            `FileField.getIndexable` and rather naive as all data gets
-            loaded into memory if a suitable transform was found.
-            this should probably use `plone.transforms` in the future """
-        field = self.getPrimaryField()
-        source = field.getContentType(self)
-        transforms = getToolByName(self, 'portal_transforms')
-        if transforms._findPath(source, mimetype) is None:
-            return ''
-        value = str(field.get(self))
-        filename = field.getFilename(self)
-        try:
-            return str(transforms.convertTo(mimetype, value,
-                mimetype=source, filename=filename))
-        except (ConflictError, KeyboardInterrupt):
-            raise
-        except:
-            getLogger(__name__).exception('exception while trying to convert '
-               'blob contents to "text/plain" for %r', self)
-
-
-
 
 
 registerATCT(Red5Stream, PROJECTNAME)
