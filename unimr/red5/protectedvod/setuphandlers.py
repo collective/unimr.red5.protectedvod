@@ -35,12 +35,12 @@ from StringIO import StringIO
 from Products.CMFCore.utils import getToolByName
 
 paragraph_styles = [
-    "Red5 Stream|div|red5-stream",    
+    u'Red5 Stream|div|red5-stream',    
 ]
 
 table_classnames = []
 
-resource_types = { 'linkable': ('Red5Stream', ),
+resource_types = { u'linkable': (u'Red5Stream', ),
                    }
 
 def importFinalSteps(context):
@@ -52,32 +52,60 @@ def importFinalSteps(context):
     
     out = StringIO()
     
-    print >> out, "Installing additional Kupu styles"
+
+    print >> out, "Installing additional WYSIWYG styles"
     
-    kupu = site.kupu_library_tool
-    for s in paragraph_styles:
-        s = s.strip()
-        if not s in kupu.paragraph_styles:
-            kupu.paragraph_styles.append(s)
-            print >> out, "Installed style:" + s
+    kupu = getToolByName(site, 'kupu_library_tool', None)
+    if  kupu:
+        for s in paragraph_styles:
+            s = s.strip()
+            if not s in kupu.paragraph_styles:
+                kupu.paragraph_styles.append(s)
+                print >> out, "Installed style:" + s
 
-    for s in table_classnames:
-        s = s.strip()
-        if not s in kupu.table_classnames:
-            kupu.table_classnames.append(s)
-            print >> out, "Installed table class:" + s
+        for s in table_classnames:
+            s = s.strip()
+            if not s in kupu.table_classnames:
+                kupu.table_classnames.append(s)
+                print >> out, "Installed table class:" + s
 
 
-    resource_type = 'linkable'   
-    old_types = kupu.getPortalTypesForResourceType(resource_type)
-    new_types = []
-    for t in resource_types[resource_type]:
-        if t not in old_types:
-            new_types.append(t)
+        resource_type = 'linkable'   
+        old_types = kupu.getPortalTypesForResourceType(resource_type)
+        new_types = []
+        for t in resource_types[resource_type]:
+            if t not in old_types:
+                new_types.append(t)
 
-    if new_types:
-        kupu.addResourceType(resource_type, list(old_types) + new_types)
-        print >> out, "Installed %s resource type(s) %s" % (resource_type,new_types)
+        if new_types:
+            kupu.addResourceType(resource_type, list(old_types) + new_types)
+            print >> out, "Installed %s resource type(s) %s" % (resource_type,new_types)
     
+    
+    tinymce = getToolByName(site, 'portal_tinymce', None)
+    if tinymce:
+        
+        types = tinymce.linkable.split()
+        resource_type = 'linkable' 
+        l=[]
+        for t in resource_types[resource_type]:
+            if t not in types:
+                l.append(t)
+                types.append(t)
+
+        tinymce.linkable='\n'.join(types)
+        print >> out, "Installed %s resource type(s) %s" % ('linkable',l)
+
+        styles = tinymce.styles.split()
+        l=[]
+        for s in paragraph_styles:
+            if s not in styles:
+                l.append(s) 
+                styles.append(s)
+
+        tinymce.styles='\n'.join(styles)
+        print >> out, "Installed styles(s) %s" % (l,)
+        
+        
     return out.getvalue()
     
