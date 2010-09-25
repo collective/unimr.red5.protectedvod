@@ -37,7 +37,8 @@ setup(name=name,
       install_requires=[
           'setuptools',
           # -*- Extra requirements: -*-
-          'iw.fss',
+          # only required for migration from iw.fss to plone.app.blob
+          #'iw.fss',
       ],
       entry_points="""
       # -*- Entry points: -*-
